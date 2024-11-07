@@ -36,7 +36,7 @@ namespace Chat.Hubs
 
         public async Task SendMessage(string message)
         {
-            var stringConnection = await _cache.GetStringAsync(Context.ConnectionId);
+            var stringConnection = await _cache.GetAsync(Context.ConnectionId);
 
             var connection = JsonSerializer.Deserialize<UserConnection>(stringConnection);
 
@@ -50,17 +50,17 @@ namespace Chat.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var stringConnection = await _cache.GetStringAsync(Context.ConnectionId);
+            var stringConnection = await _cache.GetAsync(Context.ConnectionId);
             var connection = JsonSerializer.Deserialize<UserConnection>(stringConnection);
 
             if (connection is not null)
-            {   
+            {
                 await _cache.RemoveAsync(Context.ConnectionId);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, connection.ChatRoom);
 
                 await Clients
-                .Group(connection.ChatRoom)
-                .ReceiveMessage("Admin", $"{connection.UserName} вышел из чата");
+                    .Group(connection.ChatRoom)
+                    .ReceiveMessage("Admin", $"{connection.UserName} вышел из чата");
             }
 
 
